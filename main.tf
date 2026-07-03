@@ -49,6 +49,12 @@ module "this" {
   # (necesitarían el output de este módulo antes de que este módulo termine de existir).
   enable_irsa = true
 
+  # Sin esto (default false), el usuario/rol IAM que corre `terraform apply` NO recibe
+  # un access entry con permisos sobre el cluster — ni la consola, ni kubectl, ni nuestros
+  # propios provider "kubernetes"/"helm" (que se autentican como este mismo IAM user vía
+  # `aws eks get-token`) podrían ver u operar objetos de Kubernetes.
+  enable_cluster_creator_admin_permissions = true
+
   # Solo addons sin dependencia de IRSA — sin aws-ebs-csi-driver (el lab no usa PV)
   addons = {
     coredns = {
@@ -58,7 +64,9 @@ module "this" {
       most_recent = true
     }
     vpc-cni = {
-      most_recent = true
+      most_recent    = true
+      before_compute = true # crear el addon ANTES del node group — si no, los nodos
+                             # arrancan sin el plugin de red listo y terminan "Unhealthy"
     }
   }
 

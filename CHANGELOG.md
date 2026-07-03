@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.2] - 2026-07-03
+### Fixed
+- `enable_cluster_creator_admin_permissions = true`: sin esto, el IAM user/role que corre
+  `terraform apply` no recibe un access entry de EKS y no puede ver/operar objetos de
+  Kubernetes (ni por consola, ni por kubectl, ni los `provider "kubernetes"`/`"helm"` del
+  repo consumidor).
+- `before_compute = true` en el addon `vpc-cni`: sin esto, el addon podía crearse después
+  de que los nodos arrancaran, dejándolos sin el plugin de red listo a tiempo y causando
+  `NodeCreationFailure: Unhealthy nodes in the kubernetes cluster`.
+
 ## [0.1.1] - 2026-07-03
 ### Fixed
 - Upgrade `terraform-aws-modules/eks/aws` de `~> 20.31` a `~> 21.24`: v20 exige `aws` provider
