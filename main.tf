@@ -3,17 +3,24 @@
 # EKS desde cero: el motor real es el módulo público terraform-aws-modules/eks/aws. Este
 # módulo expone únicamente el subconjunto de variables/outputs que necesitan mis labs, con
 # mi convención de naming (project/environment) y tags.
+#
+# Pin a v21.x (no v20.x): v20 exige aws provider < 6.0.0, lo cual choca con mod-aws-vpc y
+# mod-aws-iam-role, que ya usan aws ~> 6.47 — Terraform necesita una sola versión de
+# provider para todo el árbol de módulos. v21 soporta aws provider 6.x. Los nombres de
+# varias variables cambiaron en v21 (cluster_name -> name, cluster_version ->
+# kubernetes_version, cluster_endpoint_* -> endpoint_*, cluster_addons -> addons) pero
+# enable_irsa/oidc_provider_arn/oidc_provider siguen existiendo igual.
 
 module "this" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.31"
+  version = "~> 21.24"
 
-  cluster_name    = local.cluster_name
-  cluster_version = var.cluster_version
+  name               = local.cluster_name
+  kubernetes_version = var.cluster_version
 
-  cluster_endpoint_public_access       = true # Lab only — en prd usar private + VPN
-  cluster_endpoint_private_access      = true
-  cluster_endpoint_public_access_cidrs = [var.my_ip_cidr]
+  endpoint_public_access       = true # Lab only — en prd usar private + VPN
+  endpoint_private_access      = true
+  endpoint_public_access_cidrs = [var.my_ip_cidr]
 
   vpc_id     = var.vpc_id
   subnet_ids = var.subnet_ids
@@ -27,7 +34,8 @@ module "this" {
       desired_size   = var.node_desired_size
       disk_size      = var.node_disk_size
 
-      associate_public_ip_address = false
+      # Sin public IP: ya lo garantiza la subnet EKS de mod-aws-vpc (no tiene
+      # map_public_ip_on_launch) — no es un argumento válido en este nivel del objeto.
 
       labels = {
         role = "general"
@@ -42,7 +50,7 @@ module "this" {
   enable_irsa = true
 
   # Solo addons sin dependencia de IRSA — sin aws-ebs-csi-driver (el lab no usa PV)
-  cluster_addons = {
+  addons = {
     coredns = {
       most_recent = true
     }
