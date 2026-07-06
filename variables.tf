@@ -46,9 +46,9 @@ variable "cluster_version" {
 ### NODE GROUP ###
 
 variable "node_instance_types" {
-  description = "Instance types for the managed node group"
+  description = "Instance types for the managed node group. t3.small soporta solo ~11 pods/nodo (límite de IPs del ENI, no de CPU/RAM) — insuficiente para correr ArgoCD + External Secrets + ALB Controller + kube-prometheus-stack a la vez. t3.medium (~17 pods/nodo) es el mínimo viable para este lab"
   type        = list(string)
-  default     = ["t3.small"]
+  default     = ["t3.medium"]
 }
 
 variable "node_capacity_type" {

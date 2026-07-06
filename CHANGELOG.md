@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.3] - 2026-07-05
+### Fixed
+- Default `node_instance_types` de `t3.small` a `t3.medium`. `t3.small` tiene un límite de
+  **~11 pods por nodo** (fórmula EKS: `ENIs × (IPs por ENI - 1) + 2`, ligado a IPs de ENI, no
+  a CPU/memoria) — insuficiente para correr ArgoCD (7 pods) + External Secrets (3) + ALB
+  Controller (2) + kube-prometheus-stack (varios) simultáneamente en 2 nodos. Causaba
+  `FailedScheduling: Too many pods` y timeouts en `helm_release`. `t3.medium` sube el límite a
+  ~17 pods/nodo (34 en total con 2 nodos).
+
 ## [0.1.2] - 2026-07-03
 ### Fixed
 - `enable_cluster_creator_admin_permissions = true`: sin esto, el IAM user/role que corre
