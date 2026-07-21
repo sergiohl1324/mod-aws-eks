@@ -67,6 +67,17 @@ module "this" {
       most_recent    = true
       before_compute = true # crear el addon ANTES del node group — si no, los nodos
                              # arrancan sin el plugin de red listo y terminan "Unhealthy"
+
+      # Prefix delegation: cada ENI reparte prefijos /28 (16 IPs) en vez de IPs sueltas,
+      # multiplicando los pods/nodo posibles sin cambiar el tipo de instancia. Sin esto,
+      # t3.medium tope ~17 pods/nodo — límite real que golpeamos en el lab (ver K8S.md,
+      # Incidentes #4 y el de vpc-cni IP exhaustion). El bootstrap de la AMI de EKS ya
+      # recalcula max-pods automáticamente al detectar esto activo, no hace falta tocarlo.
+      configuration_values = jsonencode({
+        env = {
+          ENABLE_PREFIX_DELEGATION = "true"
+        }
+      })
     }
   }
 

@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.4] - 2026-07-21
+### Fixed
+- Habilitado `ENABLE_PREFIX_DELEGATION` en el addon `vpc-cni` (via `configuration_values`).
+  El límite de ~17 pods/nodo de `t3.medium` (fijado en 0.1.3) volvió a golpearse al agregar
+  `demo-backend-api`/`demo-frontend-web` sobre lo que ya corría (ArgoCD + External Secrets +
+  ALB Controller + kube-prometheus-stack + metrics-server + nginx-app) — 16-17 pods/nodo,
+  causando `FailedCreatePodSandBox: failed to assign an IP address to container` en
+  reprogramaciones. Prefix delegation reparte IPs por prefijos /28 (16 IPs) en vez de una por
+  una en cada ENI, multiplicando la capacidad sin cambiar de instancia — el fix "correcto" de
+  producción que ya habíamos dejado anotado como pendiente en la 0.1.3. La AMI de EKS
+  recalcula `max-pods` sola al detectarlo activo.
+
 ## [0.1.3] - 2026-07-05
 ### Fixed
 - Default `node_instance_types` de `t3.small` a `t3.medium`. `t3.small` tiene un límite de

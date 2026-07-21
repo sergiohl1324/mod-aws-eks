@@ -48,7 +48,7 @@ patrón completo.
 | subnet_ids | Subnets para cluster + node group | list(string) | — |
 | my_ip_cidr | CIDR permitido en el endpoint público | string | — |
 | cluster_version | Versión de Kubernetes | string | "1.31" |
-| node_instance_types | Tipos de instancia del node group. t3.small soporta solo ~11 pods/nodo (límite de IPs del ENI) — t3.medium (~17/nodo) es el mínimo viable para ArgoCD+addons+monitoring | list(string) | ["t3.medium"] |
+| node_instance_types | Tipos de instancia del node group. t3.small soporta solo ~11 pods/nodo (límite de IPs del ENI) — t3.medium (~17/nodo sin prefix delegation) es el mínimo viable para ArgoCD+addons+monitoring. Desde 0.1.4 el addon vpc-cni usa prefix delegation (`ENABLE_PREFIX_DELEGATION=true`), que sube ese límite bastante más sin cambiar de instancia | list(string) | ["t3.medium"] |
 | node_capacity_type | ON_DEMAND o SPOT | string | "SPOT" |
 | node_min_size / node_max_size / node_desired_size | Escalado del node group | number | 1 / 3 / 2 |
 | node_disk_size | Tamaño de disco EBS por nodo (GiB) | number | 20 |
